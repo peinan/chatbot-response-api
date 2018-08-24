@@ -1,0 +1,6 @@
+falcon
+numpy
+scikit-learn
+mysql-connector-python-rf
+mecab-python3
+gensim

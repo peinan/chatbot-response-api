@@ -1,0 +1,8 @@
+.DS_Store
+
+data
+etc/config.ini
+
+.idea
+
+__pycache__
