@@ -1,12 +1,14 @@
-from vectorizers.vectorizerbase import VectorizerBase
 from gensim.models import word2vec
 import numpy as np
-from typing import Optional
+
+from vectorizers.vectorizerbase import VectorizerBase
 
 
 class VectorizerW2V(VectorizerBase):
     def __init__(self):
         super(VectorizerW2V, self).__init__()
+        self.word2id_path = self.config['models']['word2id']
+        self.w2v_model_path = self.config['models']['word2vec']
         self.model = word2vec.Word2Vec.load(self.w2v_model_path)
 
     def lookup(self, word: str) -> np.array:
@@ -17,7 +19,7 @@ class VectorizerW2V(VectorizerBase):
 
         return word_vec
 
-    def sent2vec(self, sentence_or_words, mode='average') -> Optional[np.array]:
+    def sent2vec(self, sentence_or_words, mode='average') -> np.array:
         if type(sentence_or_words) == str:
             words = self.mparser.wakati(sentence_or_words)
         elif type(sentence_or_words) == list:
@@ -25,12 +27,17 @@ class VectorizerW2V(VectorizerBase):
         else:
             raise ValueError(f'"{sentence_or_words}" is neither a list nor a str.')
 
-        if mode == 'average':
-            word_vecs = [ self.lookup(word) for word in words if len(self.lookup(word)) ]
-            sent_vec = np.array(word_vecs).mean(axis=0)
-            if not len(sent_vec.shape):
-                sent_vec = np.zeros(self.model.wv.vector_size)
-        else:
-            sent_vec = np.zeros(self.model.wv.vector_size)
+        word_vecs = [ self.lookup(word) for word in words if len(self.lookup(word)) != 0 ]
+        sentvec = np.nanmean(np.array(word_vecs), axis=0)
 
-        return sent_vec
+        if np.all(np.isnan(sentvec)):
+            sentvec = np.zeros(self.model.wv.vector_size)
+            sentvec[:] = np.nan
+
+        return sentvec
+
+    def make_sentmtx(self, sentences: list) -> np.array:
+        sentmtx = np.array([ self.sent2vec(s) for s in sentences])
+
+        return sentmtx
+

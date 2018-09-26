@@ -3,13 +3,13 @@ import falcon
 import json
 from json.decoder import JSONDecodeError
 
-from vectorizers.word2vec import VectorizerW2V
+from vectorizers.vectorizer import Vectorizer
 from evaluators.evaluator import Evaluator
 
 
 class ResourceBase:
     def __init__(self):
-        self.vectorizer = VectorizerW2V()
+        self.vectorizer = Vectorizer()
         self.evaluator = Evaluator()
 
 
@@ -28,9 +28,7 @@ class ReplyResource(ResourceBase):
 
         uttr = body['utterance']
 
-        topn = body['maxReplies']
-        if not body['maxReplies']:
-            topn = 1
+        topn = body['maxReplies'] if 'maxReplies' in body else 1
 
         res_body = {'replies': self.__get_replies(uttr, topn)}
 
@@ -38,8 +36,8 @@ class ReplyResource(ResourceBase):
         res.status = falcon.HTTP_200
 
     def __get_replies(self, utterance, topn):
-        uttr_vec = self.vectorizer.sent2vec(utterance)
-        replies = self.evaluator.get_topn_replies(uttr_vec, topn)
+        uttr_vecs = self.vectorizer.vectorize(utterance)
+        replies = self.evaluator.get_topn_replies(uttr_vecs, topn)
 
         return replies
 

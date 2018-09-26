@@ -1,10 +1,10 @@
 import mysql.connector
-from utils.util import Util
+from utils import util as u
 
 
 class DBCrawled:
     def __init__(self):
-        self.config = Util.load_config()
+        self.config = u.Util.load_config()
         self.db_config = self.config['db_crawled']
 
     def make_connection(self):
