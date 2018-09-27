@@ -4,16 +4,6 @@ from vectorizers.word2vec import VectorizerW2V
 from utils import util as u
 
 
-def make_sentmtx_charngram_legacy(qs, datadir):
-    # make charngram sentmtx
-    sentmtx_c2g, charngram2id, id2charngram = VectorizerCharNgram.make_sentmtx_legacy(qs)
-
-    # dump
-    u.Util.pickle_dump(sentmtx_c2g,  f"{datadir / 'sentmtx.charngram.pkl'}")
-    u.Util.pickle_dump(charngram2id, f"{datadir / 'charngram2id.pkl'}")
-    u.Util.pickle_dump(id2charngram, f"{datadir / 'id2charngram.pkl'}")
-
-
 def make_sentmtx_charngram(qs, datadir):
     """
     A new fast method using Feature Hasing
@@ -42,9 +32,8 @@ def main():
     qas = u.Util.pickle_load(qas_filepath)
     qs = [ qa[0] for qa in qas ]
 
-    # make_sentmtx_charngram_legacy(qs, datadir)
     make_sentmtx_charngram(qs, datadir)
-    # make_sentmtx_word2vec(qs, datadir)
+    make_sentmtx_word2vec(qs, datadir)
 
 
 if __name__ == '__main__':

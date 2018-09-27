@@ -1,9 +1,7 @@
 import numpy as np
-# from sklearn.metrics.pairwise import cosine_similarity
+import time
 
 from utils import util as u
-
-import time
 
 
 class Evaluator:
