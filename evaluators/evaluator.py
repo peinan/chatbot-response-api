@@ -22,7 +22,7 @@ class Evaluator:
     def _calc_charngram_sim(self, tgt_vec: np.array) -> np.array:
         assert tgt_vec.shape == (self.charngram_sentmtx.shape[1],)
 
-        sim = u.Util.jaccard_similarity(self.charngram_sentmtx, tgt_vec.reshape(1, -1))
+        sim = u.Util.jaccard_similarity_minhash(self.charngram_sentmtx, tgt_vec.reshape(1, -1))
 
         return sim
 
@@ -32,7 +32,7 @@ class Evaluator:
 
         return np.nanmean(sim_ary, axis=0)
 
-    def get_topn_replies(self, uttr_vecs: dict, topn: int) -> list:
+    def get_topn_replies(self, uttr_vecs: dict, topn: int, verbose=False) -> list:
 
         cp1 = time.time()
 
@@ -51,7 +51,7 @@ class Evaluator:
         cp4 = time.time()
         print(f'Lap CP4: {cp4-cp3:.4f}s')
 
-        sorted_topn_indices = sims.argsort(axis=0)[(sims.shape[0] - topn):]
+        sorted_topn_indices = sims.argsort(axis=0)[(sims.shape[0] - topn):][::-1]
 
         cp5 = time.time()
         print(f'Lap CP5: {cp5-cp4:.4f}s')
@@ -59,9 +59,13 @@ class Evaluator:
         replies = []
         for idx in sorted_topn_indices:
             q, a = self.qas[idx]
-            replies.append((a,
-                            {'word2vec_sim': w2v_sim[idx],
-                             'charngram_sim': charngram_sim[idx]}))
+            if verbose:
+                replies.append((a,
+                                {'similarity': sims[idx],
+                                 'word2vec_sim': w2v_sim[idx],
+                                 'charngram_sim': charngram_sim[idx]}))
+            else:
+                replies.append((a, {'similarity': sims[idx]}))
 
         cp6 = time.time()
         print(f'Lap CP6: {cp6-cp5:.4f}s')

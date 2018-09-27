@@ -2,6 +2,8 @@ import configparser
 from pathlib import Path
 import pickle as pkl
 import numpy as np
+from hashlib import sha1
+import time, struct
 
 from db.manager import DBCrawledManager
 
@@ -107,16 +109,70 @@ class Util:
         assert len(x1.shape) == len(x2.shape) == 2
         assert x1.shape[1] == x2.shape[1], 'it must be same dimension 2-D matrice.'
 
+        cp1 = time.time()
+
         # 集合なので 2 以上の数を 1 にする
         x1[x1 >= 1] = 1
         x2[x2 >= 1] = 1
 
+        cp2 = time.time()
+        print(f'JS Lap CP2: {cp2-cp1:.4f}')
+
         x1_and_x2 = (x1 * x2).sum(axis=1)
+
+        cp3 = time.time()
+        print(f'JS Lap CP3: {cp3-cp2:.4f}')
+
         x_sum = x1 + x2
+
+        cp4 = time.time()
+        print(f'JS Lap CP4: {cp4-cp3:.4f}')
+
         x_sum[x_sum >= 1] = 1
+
+        cp5 = time.time()
+        print(f'JS Lap CP5: {cp5-cp4:.4f}')
+
         x1_or_x2 = x_sum.sum(axis=1)
 
+        cp6 = time.time()
+        print(f'JS Lap CP6: {cp6-cp5:.4f}')
+
         return x1_and_x2 / x1_or_x2
+
+    @staticmethod
+    def jaccard_similarity_minhash(x1: np.array, x2: np.array) -> np.array:
+        assert len(x1.shape) == len(x2.shape) == 2
+        assert x1.shape[1] == x2.shape[1]
+        assert x2.shape[0] == 1
+
+        return np.count_nonzero(x1==x2, axis=1).astype(np.float) / np.float(x1.shape[1])
+
+    @staticmethod
+    def minhash(ngrams: list) -> np.array:
+        # init hashvalues
+        _max_hash = (1 << 32) - 1
+        _num_perm = 128
+        _mersenne_prime = (1 << 61) - 1
+        hashvalues = np.ones(_num_perm, dtype=np.uint64) * _max_hash
+
+        # create generator
+        seed = 1
+        generator = np.random.RandomState(seed=seed)
+        permutations = np.array([ (generator.randint(1, _mersenne_prime, dtype=np.uint64),
+                                   generator.randint(0, _mersenne_prime, dtype=np.uint64))
+                                  for _ in range(_num_perm)], dtype=np.uint64).T
+
+        # update hashvalues
+        hashobj = sha1
+        for ngram in ngrams:
+            b = ngram.encode('utf-8')
+            hv = struct.unpack('<I', hashobj(b).digest()[:4])[0]
+            a, b = permutations
+            phv = np.bitwise_and((a * hv + b) % _mersenne_prime, np.uint64(_max_hash))
+            hashvalues = np.minimum(phv, hashvalues)
+
+        return hashvalues
 
     @staticmethod
     def add_BOS_EOS(items: list, BOS='<s>', EOS='</s>'):

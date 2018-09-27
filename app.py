@@ -29,15 +29,16 @@ class ReplyResource(ResourceBase):
         uttr = body['utterance']
 
         topn = body['maxReplies'] if 'maxReplies' in body else 1
+        verbose = body['verbose'] if 'verbose' in body else False
 
-        res_body = {'replies': self.__get_replies(uttr, topn)}
+        res_body = {'replies': self.__get_replies(uttr, topn, verbose)}
 
         res.body = json.dumps(res_body, ensure_ascii=False)
         res.status = falcon.HTTP_200
 
-    def __get_replies(self, utterance, topn):
+    def __get_replies(self, utterance, topn, verbose):
         uttr_vecs = self.vectorizer.vectorize(utterance)
-        replies = self.evaluator.get_topn_replies(uttr_vecs, topn)
+        replies = self.evaluator.get_topn_replies(uttr_vecs, topn, verbose=verbose)
 
         return replies
 
