@@ -2,6 +2,7 @@ import configparser
 from pathlib import Path
 import pickle as pkl
 import numpy as np
+from gensim.models import word2vec
 from hashlib import sha1
 import time, struct
 
@@ -84,6 +85,19 @@ class Util:
         data = Util.pickle_load(filepath)
 
         return data
+
+    @staticmethod
+    def load_model(model_name):
+        if model_name == 'word2vec':
+            filename_ptn = '*.w2v-model'
+            filepath = str(list((Path(__file__).absolute().parent / '../model').glob(filename_ptn))[0])
+            print(f'Loading {model_name}: {filepath}')
+            model = word2vec.Word2Vec.load(filepath)
+        else:
+            raise ValueError(f'{model_name} not found.')
+
+        return model
+
 
     @staticmethod
     def cosine_similarity(x1: np.array, x2: np.array) -> np.array:

@@ -1,15 +1,13 @@
-from gensim.models import word2vec
 import numpy as np
 
 from vectorizers.vectorizerbase import VectorizerBase
+from utils import util as u
 
 
 class VectorizerW2V(VectorizerBase):
     def __init__(self):
         super(VectorizerW2V, self).__init__()
-        self.word2id_path = self.config['models']['word2id']
-        self.w2v_model_path = self.config['models']['word2vec']
-        self.model = word2vec.Word2Vec.load(self.w2v_model_path)
+        self.model = u.Util.load_model('word2vec')
 
     def lookup(self, word: str) -> np.array:
         try:

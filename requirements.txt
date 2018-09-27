@@ -1,6 +1,7 @@
 falcon
 numpy
 scikit-learn
-mysql-connector-python-rf
+mysql-connector-python
 mecab-python3
 gensim
+gunicorn

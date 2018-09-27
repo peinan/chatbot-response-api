@@ -1,7 +1,8 @@
 .DS_Store
 
 data
-etc/config.ini
+model
+config.ini
 
 .idea
 

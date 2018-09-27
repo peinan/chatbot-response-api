@@ -1,4 +1,4 @@
-ig]mport mysql.connector
+import mysql.connector
 from utils import util as u
 
 
