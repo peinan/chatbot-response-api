@@ -2,10 +2,13 @@ from vectorizers.vectorizerbase import VectorizerBase
 from vectorizers.word2vec import VectorizerW2V
 from vectorizers.charngram import VectorizerCharNgram
 
+from logging import getLogger
+
 
 class Vectorizer(VectorizerBase):
     def __init__(self):
         super(Vectorizer, self).__init__()
+        self.logger = getLogger('doppel')
         self.load_all_vectorizers()
 
     def load_all_vectorizers(self):

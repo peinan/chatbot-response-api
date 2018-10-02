@@ -2,6 +2,7 @@
 
 data
 model
+logs
 config.ini
 
 .idea

@@ -6,7 +6,11 @@ from gensim.models import word2vec
 from hashlib import sha1
 import time, struct
 
+from logging import getLogger
 from db.manager import DBCrawledManager
+
+
+logger = getLogger('doppel')
 
 
 class MacOSFile(object):
@@ -46,11 +50,13 @@ class Util:
 
     @staticmethod
     def pickle_dump(obj, file_path):
+        logger.info(f'Dumping pickle: {file_path} ...')
         with open(file_path, "wb") as f:
             return pkl.dump(obj, MacOSFile(f), protocol=pkl.HIGHEST_PROTOCOL)
 
     @staticmethod
     def pickle_load(file_path):
+        logger.info(f'Loading pickle: {file_path} ...')
         with open(file_path, "rb") as f:
             return pkl.load(MacOSFile(f))
 
@@ -58,8 +64,8 @@ class Util:
     def load_config(config_filepath=None):
         if not config_filepath:
             config_filename = 'config.ini'
-            config_filepath = Path(__file__).absolute().parent / f'../etc/{config_filename}'
-        print(f'Loading {config_filepath}')
+            config_filepath = Path(__file__).resolve().parent / f'../etc/{config_filename}'
+        logger.info(f'Loading config: {config_filepath} ...')
         config = configparser.ConfigParser()
         config.read(config_filepath)
 
@@ -78,9 +84,9 @@ class Util:
         else:
             raise ValueError(f'Type {dataname} not found.')
 
-        filepath = Path(__file__).absolute().parent / f'../data/{filename}'
+        filepath = Path(__file__).resolve().parent / f'../data/{filename}'
 
-        print(f'Loading {dataname}: {filepath}')
+        logger.info(f'Loading data {dataname}: {filepath} ...')
 
         data = Util.pickle_load(filepath)
 
@@ -90,8 +96,8 @@ class Util:
     def load_model(model_name):
         if model_name == 'word2vec':
             filename_ptn = '*.w2v-model'
-            filepath = str(list((Path(__file__).absolute().parent / '../model').glob(filename_ptn))[0])
-            print(f'Loading {model_name}: {filepath}')
+            filepath = str(list((Path(__file__).resolve().parent / '../model').glob(filename_ptn))[0])
+            logger.info(f'Loading model {model_name}: {filepath} ...')
             model = word2vec.Word2Vec.load(filepath)
         else:
             raise ValueError(f'{model_name} not found.')

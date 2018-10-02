@@ -27,7 +27,7 @@ def make_sentmtx_word2vec(qs, datadir):
 
 
 def main():
-    datadir = Path(__file__).absolute().parent / '../data'
+    datadir = Path(__file__).resolve().parent / '../data'
     qas_filepath = datadir / 'raw_qas.pkl'
     qas = u.Util.pickle_load(qas_filepath)
     qs = [ qa[0] for qa in qas ]
