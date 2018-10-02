@@ -13,6 +13,9 @@ RUN apt-get update -y \
 
 # 文字化け対策の locale 設定
 RUN echo "ja_JP UTF-8" > /etc/locale.gen && locale-gen
+ENV LANG ja_JP.UTF-8
+ENV LANGUAGE ja_JP:ja
+ENV LC_ALL ja_JP.UTF-8
 
 WORKDIR /root/
 
