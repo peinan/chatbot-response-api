@@ -14,7 +14,6 @@ class ResourceBase:
         self.logger = Logger(name='doppel').get_logger()
         self.vectorizer = Vectorizer()
         self.evaluator = Evaluator()
-        self.debug_mode = False
 
 
 class ReplyResource(ResourceBase):
@@ -23,6 +22,7 @@ class ReplyResource(ResourceBase):
         self.logger.info('Server Ready.')
 
     def on_post(self, req, res):
+        debug_mode = False
         data = req.stream.read().decode('utf-8')
         self.logger.info(f'Received: {data}')
         try:
@@ -50,11 +50,11 @@ class ReplyResource(ResourceBase):
             raise falcon.HTTPBadRequest('"maxReplies" must be in the range of [1, 10].')
 
         if len(uttr.strip()) >= 7 and uttr.endswith('でばっぐだよ☆'):
-            self.debug_mode = True
+            debug_mode = True
             uttr = uttr.replace('でばっぐだよ☆', '').strip()
             self.logger.info('DEBUG MODE')
 
-        replies = self.__get_replies(uttr, topn, verbose)
+        replies = self.__get_replies(uttr, topn, debug_mode, verbose)
         res_body = {'replies': replies}
 
         res.body = json.dumps(res_body, ensure_ascii=False)
@@ -63,13 +63,13 @@ class ReplyResource(ResourceBase):
         self.logger.info(f'RETURN STATUS: {res.status}')
         self.logger.info(f'RETURN BODY: {res.body}')
 
-    def __get_replies(self, utterance: str, topn: int, verbose: bool):
+    def __get_replies(self, utterance: str, topn: int, debug_mode: bool, verbose: bool):
         uttr_vecs = self.vectorizer.vectorize(utterance)
         replies = self.evaluator.get_topn_replies(uttr_vecs, topn)
 
-        if self.debug_mode:
+        if debug_mode:
             for reply in replies:
-                reply['text'] += '\n\n<DEBUG>\n\n'
+                reply['text'] += '\n\n<DEBUG>\n'
                 for k, v in reply.items():
                     if k == 'text':
                         continue
